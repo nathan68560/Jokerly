@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jokerly',
       theme: ThemeData(
+        fontFamily: 'KGRedHands',
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF31B56A)),
         useMaterial3: true,
         canvasColor: Colors.transparent,
@@ -37,11 +38,28 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "My Decks",
+          style: TextStyle(
+              fontSize: 30.0,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.primary),
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        alignment: Alignment.topLeft,
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [],
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
-            topRight: Radius.circular(30),
-            topLeft: Radius.circular(30),
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
           ),
           boxShadow: [
             BoxShadow(
@@ -53,15 +71,18 @@ class _HomePageState extends State<HomePage> {
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(30),
-            topLeft: Radius.circular(30),
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
           ),
           child: BottomNavigationBar(
-            fixedColor: Colors.white,
+            iconSize: 30.0,
+            selectedFontSize: 0.0,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white,
             backgroundColor: Theme.of(context).colorScheme.primary,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.home_rounded),
                 label: "Home",
               ),
               BottomNavigationBarItem(

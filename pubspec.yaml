@@ -27,6 +27,17 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 
 flutter:
+  fonts:
+    - family: Riffic
+      fonts:
+        - asset: fonts/riffic/RifficFree-Bold.ttf
+          weight: 700
+    - family: KGRedHands
+      fonts:
+        - asset: fonts/kg_red_hands/KGRedHands.ttf
+    - family: KGRedHands Outline
+      fonts:
+        - asset: fonts/kg_red_hands/KGRedHandsOutline.ttf
 
   uses-material-design: true
 

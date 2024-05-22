@@ -17,12 +17,17 @@ class _DeckPageState extends State<DeckPage> {
     return Scaffold(
       appBar: deckAppBar(context),
       body: Container(
+        padding: const EdgeInsets.all(20.0),
         alignment: Alignment.topLeft,
-        child: ListView.separated(
-          padding: const EdgeInsets.all(20.0),
+        child: GridView.builder(
+          clipBehavior: Clip.none,
           itemCount: widget.deck.flashcards.length,
-          scrollDirection: Axis.vertical,
-          separatorBuilder: (context, index) => const SizedBox(height: 20.0),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 400,
+            mainAxisSpacing: 20,
+            crossAxisSpacing: 20,
+            childAspectRatio: 1.5,
+          ),
           itemBuilder: (context, index) =>
               FlashcardWidget(flashcard: widget.deck.flashcards[index]),
         ),

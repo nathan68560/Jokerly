@@ -59,6 +59,7 @@ class _FlashcardState extends State<FlashcardWidget>
 
   Container frontSide() {
     return Container(
+      padding: const EdgeInsets.all(15.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
@@ -71,14 +72,11 @@ class _FlashcardState extends State<FlashcardWidget>
           ),
         ],
       ),
-      child: SizedBox(
-        height: 100,
-        child: Center(
-          child: Text(
-            widget.flashcard.question,
-            style: const TextStyle(
-              color: Color(0xff2a2a2a),
-            ),
+      child: Center(
+        child: Text(
+          widget.flashcard.question,
+          style: const TextStyle(
+            color: Color(0xff2a2a2a),
           ),
         ),
       ),
@@ -87,6 +85,7 @@ class _FlashcardState extends State<FlashcardWidget>
 
   Container backSide() {
     return Container(
+      padding: const EdgeInsets.all(15.0),
       decoration: BoxDecoration(
         color: const Color(0xff2a2a2a),
         borderRadius: BorderRadius.circular(12.0),
@@ -99,17 +98,14 @@ class _FlashcardState extends State<FlashcardWidget>
           ),
         ],
       ),
-      child: SizedBox(
-        height: 100,
-        child: Center(
-          child: Transform(
-            alignment: FractionalOffset.center,
-            transform: Matrix4.identity()..rotateY(pi),
-            child: Text(
-              widget.flashcard.answer,
-              style: const TextStyle(
-                color: Colors.white,
-              ),
+      child: Center(
+        child: Transform(
+          alignment: FractionalOffset.center,
+          transform: Matrix4.identity()..rotateY(pi),
+          child: Text(
+            widget.flashcard.answer,
+            style: const TextStyle(
+              color: Colors.white,
             ),
           ),
         ),

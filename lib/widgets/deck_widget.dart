@@ -22,7 +22,6 @@ class FlashcardDeckWidget extends StatelessWidget {
         );
       },
       child: Container(
-        height: 140.0,
         decoration: BoxDecoration(
           gradient: RadialGradient(
             center: const Alignment(-0.8, -0.8),

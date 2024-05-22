@@ -64,6 +64,7 @@ class _DeckPageState extends State<DeckPage> {
           child: IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => print("Edit"),
+            tooltip: "Edit",
           ),
         ),
       ],

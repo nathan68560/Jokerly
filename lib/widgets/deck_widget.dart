@@ -10,11 +10,17 @@ class FlashcardDeckWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapUp: (details) => Navigator.push(
-        context,
-        CupertinoPageRoute(builder: (_) => DeckPage(deck: deck)),
-      ),
+    return InkWell(
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTapUp: (details) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (_) => DeckPage(deck: deck)),
+        );
+      },
       child: Container(
         height: 140.0,
         decoration: BoxDecoration(

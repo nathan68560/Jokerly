@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/flashcard_model.dart';
 
@@ -10,35 +12,103 @@ class FlashcardWidget extends StatefulWidget {
   State<FlashcardWidget> createState() => _FlashcardState();
 }
 
-class _FlashcardState extends State<FlashcardWidget> {
-  bool _showAnswer = false;
+class _FlashcardState extends State<FlashcardWidget>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation _animation;
+  AnimationStatus _status = AnimationStatus.dismissed;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
+    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        _status = status;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => setState(() {
-        _showAnswer = !_showAnswer;
-      }),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _showAnswer ? const Color(0xff2a2a2a) : Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: const [
-            BoxShadow(
-              offset: Offset(1, 3),
-              spreadRadius: 1,
-              blurRadius: 1,
-              color: Color.fromARGB(50, 158, 158, 158),
+    return Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.001)
+        ..rotateY(pi * _animation.value),
+      alignment: FractionalOffset.center,
+      child: InkWell(
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () {
+            setState(() {
+              if (_status == AnimationStatus.dismissed) {
+                _controller.forward();
+              } else {
+                _controller.reverse();
+              }
+            });
+          },
+          child: _controller.value > 0.5 ? backSide() : frontSide()),
+    );
+  }
+
+  Container frontSide() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(1, 3),
+            spreadRadius: 1,
+            blurRadius: 1,
+            color: Color.fromARGB(50, 158, 158, 158),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        height: 100,
+        child: Center(
+          child: Text(
+            widget.flashcard.question,
+            style: const TextStyle(
+              color: Color(0xff2a2a2a),
             ),
-          ],
+          ),
         ),
-        child: SizedBox(
-          height: 100,
-          child: Center(
+      ),
+    );
+  }
+
+  Container backSide() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff2a2a2a),
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(1, 3),
+            spreadRadius: 1,
+            blurRadius: 1,
+            color: Color.fromARGB(50, 158, 158, 158),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        height: 100,
+        child: Center(
+          child: Transform(
+            alignment: FractionalOffset.center,
+            transform: Matrix4.identity()..rotateY(pi),
             child: Text(
-              _showAnswer ? widget.flashcard.answer : widget.flashcard.question,
-              style: TextStyle(
-                color: _showAnswer ? Colors.white : const Color(0xff2a2a2a),
+              widget.flashcard.answer,
+              style: const TextStyle(
+                color: Colors.white,
               ),
             ),
           ),

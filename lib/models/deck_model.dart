@@ -3,9 +3,9 @@ import 'package:jokerly/models/flashcard_model.dart';
 
 class FlashcardDeck {
   final String title;
-  final Color color;
-  final String description;
-  final List<Flashcard> flashcards;
+  Color color;
+  String description;
+  List<Flashcard> flashcards;
 
   FlashcardDeck({
     required this.title,

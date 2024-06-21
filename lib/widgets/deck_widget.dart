@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:jokerly/models/deck_model.dart';
 import 'package:jokerly/pages/deck.dart';
 
-class FlashcardDeckWidget extends StatelessWidget {
+class FlashcardDeckWidget extends StatefulWidget {
   final FlashcardDeck deck;
 
   const FlashcardDeckWidget({super.key, required this.deck});
 
+  @override
+  State<FlashcardDeckWidget> createState() => _FlashcardDeckWidgetState();
+}
+
+class _FlashcardDeckWidgetState extends State<FlashcardDeckWidget> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -18,8 +23,8 @@ class FlashcardDeckWidget extends StatelessWidget {
       onTapUp: (details) {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (_) => DeckPage(deck: deck)),
-        );
+          CupertinoPageRoute(builder: (_) => DeckPage(deck: widget.deck)),
+        ).then((_) => setState(() {}));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -28,8 +33,8 @@ class FlashcardDeckWidget extends StatelessWidget {
             radius: 2,
             stops: const [0.0, 1.0],
             colors: [
-              deck.color,
-              Color.alphaBlend(deck.color.withAlpha(200), Colors.white),
+              widget.deck.color,
+              Color.alphaBlend(widget.deck.color.withAlpha(200), Colors.white),
             ],
           ),
           borderRadius: BorderRadius.circular(12),
@@ -38,7 +43,7 @@ class FlashcardDeckWidget extends StatelessWidget {
               offset: const Offset(3, 5),
               spreadRadius: 0,
               blurRadius: 2,
-              color: deck.color.withAlpha(50),
+              color: widget.deck.color.withAlpha(50),
             ),
           ],
         ),
@@ -55,7 +60,7 @@ class FlashcardDeckWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      deck.title,
+                      widget.deck.title,
                       style: const TextStyle(
                         fontSize: 16,
                         letterSpacing: 1,
@@ -66,7 +71,7 @@ class FlashcardDeckWidget extends StatelessWidget {
                       height: 10.0,
                     ),
                     Text(
-                      deck.description,
+                      widget.deck.description,
                       style: const TextStyle(
                         fontSize: 10,
                         color: Colors.white,
@@ -75,7 +80,7 @@ class FlashcardDeckWidget extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  "${deck.flashcards.length} flashcard${deck.flashcards.length > 1 ? "s" : ""}",
+                  "${widget.deck.flashcards.length} flashcard${widget.deck.flashcards.length > 1 ? "s" : ""}",
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 10,

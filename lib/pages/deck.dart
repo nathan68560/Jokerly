@@ -60,7 +60,13 @@ class _DeckPageState extends State<DeckPage> {
   }
 
   void _addFlashcard(String question, String answer) {
-    Flashcard newFlashcard = new Flashcard(question: question, answer: answer);
+    RegExp validStr = RegExp(r"\S{1,}");
+    if (validStr.allMatches(question).isEmpty ||
+        validStr.allMatches(answer).isEmpty) {
+      return;
+    }
+
+    Flashcard newFlashcard = Flashcard(question: question, answer: answer);
     setState(() {
       widget.deck.flashcards.add(newFlashcard);
       _showNewFC = false;
@@ -321,15 +327,15 @@ class _DeckPageState extends State<DeckPage> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _backgroundColor,
             borderRadius: BorderRadius.circular(12)
                 .copyWith(bottomRight: const Radius.circular(0)),
             boxShadow: const [
               BoxShadow(
                 offset: Offset(-3, 5),
-                spreadRadius: -3,
+                spreadRadius: 0,
                 blurRadius: 10,
-                color: Colors.black12,
+                color: Colors.black26,
               ),
             ],
           ),
@@ -338,15 +344,31 @@ class _DeckPageState extends State<DeckPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
+                style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Question',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white38),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white70),
+                  ),
                 ),
                 controller: qstController,
               ),
               const SizedBox(height: 20),
               TextField(
+                style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Answer',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white38),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white70),
+                  ),
                 ),
                 controller: ansController,
               ),
@@ -358,9 +380,12 @@ class _DeckPageState extends State<DeckPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.add),
+                    Icon(Icons.add, color: Colors.white70),
                     SizedBox(width: 5),
-                    Text("Add flashcard"),
+                    Text(
+                      "Add flashcard",
+                      style: TextStyle(color: Colors.white70),
+                    ),
                   ],
                 ),
               ),

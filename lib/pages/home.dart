@@ -36,6 +36,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _addDeck(String title, String desc, Color color) async {
+    RegExp validStr = RegExp(r"\S{3,}");
+    if (validStr.allMatches(title).isEmpty ||
+        validStr.allMatches(desc).isEmpty) {
+      return;
+    }
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // Add reference to this deck through a unique ID

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/deck_model.dart';
 import 'package:jokerly/pages/deck.dart';
@@ -13,18 +14,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int folderIndex = 0;
-  List<FlashcardDeck> decks = [];
+  bool _showNewDeck = false;
+  List<FlashcardDeck> _decks = [];
 
+  // -----------------------
+  //        Functions
+  // -----------------------
   Future<void> _getDecks() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    decks = [];
+    _decks = [];
     List<String> deckUids = prefs.getStringList('deck_uids') ?? [];
 
     for (String uid in deckUids) {
       try {
-        decks.add(FlashcardDeck.fromString(prefs.getString(uid)!));
+        _decks.add(FlashcardDeck.fromString(prefs.getString(uid)!));
       } catch (e) {
         print(e);
       }
@@ -54,116 +58,31 @@ class _HomePageState extends State<HomePage> {
     await prefs.setString(newUid, newDeck.toString());
 
     setState(() {
-      folderIndex = 0;
+      _showNewDeck = false;
     });
   }
 
+  // -----------------------
+  //        Override
+  // -----------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: homeAppBar(context),
-      body: Container(
-        alignment: Alignment.topLeft,
-        padding: const EdgeInsets.all(20.0).copyWith(top: 0),
-        child: switch (folderIndex) {
-          1 => newDeck(),
-          //2 => myProfile(),
-          _ => myDecks(),
-        },
+      body: Stack(
+        children: [
+          myDecks(),
+          newDeck(),
+        ],
       ),
-      bottomNavigationBar: bottomNavBar(context),
+      floatingActionButton: newDeckBTN(context),
     );
   }
 
-  FutureBuilder<void> myDecks() {
-    return FutureBuilder(
-        future: _getDecks(),
-        builder: (context, snapshot) {
-          return GridView.builder(
-            clipBehavior: Clip.none,
-            itemCount: decks.length,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 600,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 20,
-              childAspectRatio: 2,
-            ),
-            itemBuilder: (context, index) =>
-                FlashcardDeckWidget(deck: decks[index]),
-          );
-        });
-  }
-
-  Widget newDeck() {
-    TextEditingController titleController = TextEditingController();
-    TextEditingController descController = TextEditingController();
-    Color bgColor = ColorLabel.blue.color;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          decoration: const InputDecoration(
-            labelText: 'Title',
-          ),
-          controller: titleController,
-        ),
-        const SizedBox(height: 20),
-        TextField(
-          decoration: const InputDecoration(
-            labelText: 'Description',
-          ),
-          controller: descController,
-        ),
-        const SizedBox(height: 20),
-        DropdownMenu(
-          label: const Text('Color'),
-          enableSearch: false,
-          initialSelection: ColorLabel.blue.color,
-          inputDecorationTheme: const InputDecorationTheme(
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.black54),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(),
-            ),
-          ),
-          dropdownMenuEntries: ColorLabel.values
-              .map<DropdownMenuEntry<Color>>((ColorLabel color) {
-            return DropdownMenuEntry<Color>(
-              value: color.color,
-              label: color.label,
-              leadingIcon: Icon(Icons.circle, color: color.color),
-            );
-          }).toList(),
-          onSelected: (newValue) => bgColor = newValue!,
-        ),
-        const SizedBox(height: 40),
-        IconButton(
-          onPressed: () =>
-              _addDeck(titleController.text, descController.text, bgColor),
-          icon: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.add),
-              SizedBox(width: 5),
-              Text("Add new deck"),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  // -----------------------
+  //        Sub-parts
+  // -----------------------
   AppBar homeAppBar(BuildContext context) {
-    List<String> appBarTitles = [
-      "My Decks",
-      "New Deck",
-      "My Profile",
-    ];
-
     return AppBar(
       toolbarHeight: 80,
       surfaceTintColor: Colors.transparent,
@@ -175,10 +94,10 @@ class _HomePageState extends State<HomePage> {
             bottom: Radius.elliptical(150, 25),
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Text(
-            appBarTitles[folderIndex],
-            style: const TextStyle(
+            "My Decks",
+            style: TextStyle(
               fontSize: 26.0,
               fontWeight: FontWeight.w500,
               color: Color(0xff2a2a2a),
@@ -189,51 +108,132 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container bottomNavBar(BuildContext context) {
+  Widget myDecks() {
     return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          topLeft: Radius.circular(20),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            spreadRadius: 0,
-            blurRadius: 10,
+      alignment: Alignment.topLeft,
+      padding: const EdgeInsets.all(20.0).copyWith(top: 0),
+      child: FutureBuilder(
+        future: _getDecks(),
+        builder: (context, snapshot) => GridView.builder(
+          clipBehavior: Clip.none,
+          itemCount: _decks.length,
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 600,
+            mainAxisSpacing: 20,
+            crossAxisSpacing: 20,
+            childAspectRatio: 2,
           ),
-        ],
+          itemBuilder: (context, index) =>
+              FlashcardDeckWidget(deck: _decks[index]),
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(20),
-          topLeft: Radius.circular(20),
+    );
+  }
+
+  Widget newDeck() {
+    TextEditingController titleController = TextEditingController();
+    TextEditingController descController = TextEditingController();
+    Color bgColor = ColorLabel.blue.color;
+
+    return Visibility(
+      visible: _showNewDeck,
+      child: Positioned(
+        bottom: 90.0,
+        right: 20.0,
+        width: min(400, (MediaQuery.sizeOf(context).width - 40.0)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12)
+                .copyWith(bottomRight: const Radius.circular(0)),
+            boxShadow: const [
+              BoxShadow(
+                offset: Offset(-3, 5),
+                spreadRadius: -3,
+                blurRadius: 10,
+                color: Colors.black12,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  DropdownMenu(
+                    label: const Text('Color'),
+                    width: 130,
+                    enableSearch: false,
+                    initialSelection: ColorLabel.blue.color,
+                    inputDecorationTheme: const InputDecorationTheme(
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black54),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(),
+                      ),
+                    ),
+                    dropdownMenuEntries: ColorLabel.values
+                        .map<DropdownMenuEntry<Color>>((ColorLabel color) {
+                      return DropdownMenuEntry<Color>(
+                        value: color.color,
+                        label: color.label,
+                        leadingIcon: Icon(Icons.circle, color: color.color),
+                      );
+                    }).toList(),
+                    onSelected: (newValue) => bgColor = newValue!,
+                  ),
+                  const SizedBox(width: 40),
+                  Expanded(
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                      ),
+                      controller: titleController,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                ),
+                controller: descController,
+              ),
+              const SizedBox(height: 40),
+              IconButton(
+                onPressed: () => _addDeck(
+                    titleController.text, descController.text, bgColor),
+                icon: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add),
+                    SizedBox(width: 5),
+                    Text("Add deck"),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        child: BottomNavigationBar(
-          iconSize: 30.0,
-          selectedFontSize: 0.0,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.grey,
-          backgroundColor: const Color(0xff2a2a2a),
-          currentIndex: folderIndex,
-          onTap: (value) => setState(() {
-            folderIndex = value;
-          }),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.folder_special_outlined),
-              label: "My Decks",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline_rounded),
-              label: "Add deck",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: "Profile",
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  FloatingActionButton newDeckBTN(BuildContext context) {
+    return FloatingActionButton(
+      tooltip: _showNewDeck ? "Close" : "Add new deck",
+      backgroundColor: Theme.of(context).colorScheme.onSurface,
+      foregroundColor: Theme.of(context).colorScheme.surface,
+      onPressed: () => setState(() => _showNewDeck = !_showNewDeck),
+      child: Transform(
+        transform: Matrix4.rotationZ((_showNewDeck ? 45.0 : 0.0) * pi / 180),
+        origin: const Offset(12, 12),
+        child: const Icon(Icons.add),
       ),
     );
   }

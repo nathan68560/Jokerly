@@ -1,3 +1,5 @@
+import 'package:jokerly/utility.dart';
+
 class Flashcard {
   final String question;
   final String answer;
@@ -9,7 +11,7 @@ class Flashcard {
 
   @override
   String toString() {
-    return "{question: '$question', answer: '$answer'}";
+    return "{question: '${encode(question)}', answer: '${encode(answer)}'}";
   }
 
   // Create a Flashcard object from a string representation
@@ -22,8 +24,8 @@ class Flashcard {
 
     if (questionMatch != null && answerMatch != null) {
       return Flashcard(
-        question: questionMatch.group(1)!,
-        answer: answerMatch.group(1)!,
+        question: decode(questionMatch.group(1)!),
+        answer: decode(answerMatch.group(1)!),
       );
     } else {
       throw const FormatException('Invalid flashcard format');

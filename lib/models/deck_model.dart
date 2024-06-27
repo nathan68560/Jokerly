@@ -1,3 +1,4 @@
+import 'package:jokerly/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/flashcard_model.dart';
 
@@ -18,7 +19,7 @@ class FlashcardDeck {
 
   @override
   String toString() {
-    return "{uid: '$uid', title: '$title', color: '${color.value}', description: '$description', flashcards: [${flashcards.join(', ')}]}";
+    return "{uid: '$uid', title: '${encode(title)}', color: '${color.value}', description: '${encode(description)}', flashcards: [${flashcards.join(', ')}]}";
   }
 
   /// Create a FlashcardDeck object from a string representation
@@ -56,9 +57,9 @@ class FlashcardDeck {
 
       return FlashcardDeck(
         uid: uidMatch.group(1)!,
-        title: titleMatch.group(1)!,
+        title: decode(titleMatch.group(1)!),
         color: Color(int.parse(colorMatch.group(1)!)),
-        description: descriptionMatch.group(1)!,
+        description: decode(descriptionMatch.group(1)!),
         flashcards: flashcardsList,
       );
     } else {

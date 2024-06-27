@@ -5,8 +5,10 @@ import 'package:jokerly/pages/deck.dart';
 
 class FlashcardDeckWidget extends StatefulWidget {
   final FlashcardDeck deck;
+  final Function refresh;
 
-  const FlashcardDeckWidget({super.key, required this.deck});
+  const FlashcardDeckWidget(
+      {super.key, required this.deck, required this.refresh});
 
   @override
   State<FlashcardDeckWidget> createState() => _FlashcardDeckWidgetState();
@@ -24,7 +26,7 @@ class _FlashcardDeckWidgetState extends State<FlashcardDeckWidget> {
         Navigator.push(
           context,
           CupertinoPageRoute(builder: (_) => DeckPage(deck: widget.deck)),
-        ).then((_) => setState(() {}));
+        ).then((_) => widget.refresh());
       },
       child: Container(
         decoration: BoxDecoration(

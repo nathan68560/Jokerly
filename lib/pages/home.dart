@@ -123,8 +123,10 @@ class _HomePageState extends State<HomePage> {
             crossAxisSpacing: 20,
             childAspectRatio: 2,
           ),
-          itemBuilder: (context, index) =>
-              FlashcardDeckWidget(deck: _decks[index]),
+          itemBuilder: (context, index) => FlashcardDeckWidget(
+            deck: _decks[index],
+            refresh: () => setState(() {}),
+          ),
         ),
       ),
     );

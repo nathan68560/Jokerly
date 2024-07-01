@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:jokerly/utility.dart';
 import 'package:jokerly/models/deck_model.dart';
 import 'package:jokerly/models/flashcard_model.dart';
 import 'package:jokerly/widgets/flashcard_widget.dart';
@@ -66,12 +67,22 @@ class _DeckPageState extends State<DeckPage> {
       return;
     }
 
-    Flashcard newFlashcard = Flashcard(question: question, answer: answer);
+    String newUid = encode("${DateTime.now()}");
+    Flashcard newFlashcard = Flashcard(
+      uid: newUid,
+      question: question,
+      answer: answer,
+    );
     setState(() {
       widget.deck.flashcards.add(newFlashcard);
       _showNewFC = false;
     });
 
+    _saveDeck();
+  }
+
+  void _deleteFlashcard(Flashcard flashcard) {
+    setState(() => widget.deck.flashcards.remove(flashcard));
     _saveDeck();
   }
 
@@ -309,8 +320,12 @@ class _DeckPageState extends State<DeckPage> {
         crossAxisSpacing: 20,
         childAspectRatio: 1.5,
       ),
-      itemBuilder: (context, index) =>
-          FlashcardWidget(flashcard: widget.deck.flashcards[index]),
+      itemBuilder: (context, index) => FlashcardWidget(
+        key: ValueKey(widget.deck.flashcards[index].uid),
+        flashcard: widget.deck.flashcards[index],
+        saveChanges: _saveDeck,
+        deleteFlashcard: _deleteFlashcard,
+      ),
     );
   }
 
@@ -344,8 +359,10 @@ class _DeckPageState extends State<DeckPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
+                keyboardType: TextInputType.text,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
+                  counterText: '',
                   labelText: 'Question',
                   labelStyle: TextStyle(color: Colors.white70),
                   enabledBorder: UnderlineInputBorder(
@@ -359,8 +376,10 @@ class _DeckPageState extends State<DeckPage> {
               ),
               const SizedBox(height: 20),
               TextField(
+                keyboardType: TextInputType.text,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
+                  counterText: '',
                   labelText: 'Answer',
                   labelStyle: TextStyle(color: Colors.white70),
                   enabledBorder: UnderlineInputBorder(

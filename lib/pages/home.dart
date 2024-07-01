@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/deck_model.dart';
 import 'package:jokerly/pages/deck.dart';
+import 'package:jokerly/utility.dart';
 import 'package:jokerly/widgets/deck_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     List<String> deckUids = prefs.getStringList('deck_uids') ?? [];
     String newUid;
     do {
-      newUid = base64.encode(utf8.encode("${DateTime.now()}+$title"));
+      newUid = encode("${DateTime.now()}+$title");
     } while (deckUids.contains(newUid));
     deckUids.add(newUid);
     await prefs.setStringList('deck_uids', deckUids);
@@ -130,6 +130,7 @@ class _HomePageState extends State<HomePage> {
             childAspectRatio: 2,
           ),
           itemBuilder: (context, index) => FlashcardDeckWidget(
+            key: ValueKey(_decks[index].uid),
             deck: _decks[index],
             refresh: () => setState(() {}),
           ),

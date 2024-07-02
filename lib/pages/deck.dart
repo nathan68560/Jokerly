@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jokerly/pages/lesson.dart';
 import 'package:jokerly/utility.dart';
 import 'package:jokerly/models/deck_model.dart';
 import 'package:jokerly/models/flashcard_model.dart';
@@ -126,7 +128,7 @@ class _DeckPageState extends State<DeckPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: deckAppBar(context),
+      appBar: deckAppBar(),
       body: Stack(
         children: [
           Container(
@@ -136,32 +138,11 @@ class _DeckPageState extends State<DeckPage> {
               physics: const ScrollPhysics(),
               children: [
                 editMenu(context),
-                flashcardList(context),
+                flashcardList(),
               ],
             ),
           ),
-          Positioned(
-            left: 10,
-            right: 10,
-            bottom: 0,
-            height: 88,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).colorScheme.surface.withAlpha(0),
-                    Theme.of(context).colorScheme.surface,
-                  ],
-                  stops: const [0.0, 0.2],
-                ),
-              ),
-              child: Center(
-                child: Text("${widget.deck.flashcards.length} cards"),
-              ),
-            ),
-          ),
+          flashcardsCount(context),
           learnBTN(),
           newFlashcard(),
         ],
@@ -173,7 +154,7 @@ class _DeckPageState extends State<DeckPage> {
   // -----------------------
   //        Sub-parts
   // -----------------------
-  AppBar deckAppBar(BuildContext context) {
+  AppBar deckAppBar() {
     return AppBar(
       backgroundColor: _backgroundColor,
       foregroundColor: Colors.white,
@@ -330,7 +311,7 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
-  GridView flashcardList(BuildContext context) {
+  GridView flashcardList() {
     return GridView.builder(
       shrinkWrap: true,
       clipBehavior: Clip.none,
@@ -466,8 +447,39 @@ class _DeckPageState extends State<DeckPage> {
         child: IconButton(
           iconSize: 22.0,
           tooltip: "Start a lesson",
-          onPressed: () => {},
+          onPressed: () => Navigator.push(
+            context,
+            CupertinoPageRoute(builder: (_) => LessonPage(deck: widget.deck)),
+          ),
           icon: const Icon(Icons.school_sharp, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Positioned flashcardsCount(BuildContext context) {
+    String count =
+        "${widget.deck.flashcards.length} card${widget.deck.flashcards.length > 1 ? 's' : ''}";
+
+    return Positioned(
+      left: 10,
+      right: 10,
+      bottom: 0,
+      height: 88,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.surface.withAlpha(0),
+              Theme.of(context).colorScheme.surface,
+            ],
+            stops: const [0.0, 0.2],
+          ),
+        ),
+        child: Center(
+          child: Text(count),
         ),
       ),
     );

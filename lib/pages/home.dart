@@ -235,7 +235,7 @@ class _HomePageState extends State<HomePage> {
 
   FloatingActionButton newDeckBTN(BuildContext context) {
     return FloatingActionButton(
-      tooltip: _showNewDeck ? "Close" : "Add new deck",
+      tooltip: _showNewDeck ? "Close" : "Add a new deck",
       backgroundColor: Theme.of(context).colorScheme.onSurface,
       foregroundColor: Theme.of(context).colorScheme.surface,
       onPressed: () => setState(() => _showNewDeck = !_showNewDeck),

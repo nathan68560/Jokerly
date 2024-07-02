@@ -140,6 +140,29 @@ class _DeckPageState extends State<DeckPage> {
               ],
             ),
           ),
+          Positioned(
+            left: 10,
+            right: 10,
+            bottom: 0,
+            height: 88,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(context).colorScheme.surface.withAlpha(0),
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                  stops: const [0.0, 0.2],
+                ),
+              ),
+              child: Center(
+                child: Text("${widget.deck.flashcards.length} cards"),
+              ),
+            ),
+          ),
+          learnBTN(),
           newFlashcard(),
         ],
       ),
@@ -415,9 +438,45 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
+  Positioned learnBTN() {
+    return Positioned(
+      left: 16,
+      bottom: 16,
+      width: 56,
+      height: 56,
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.deck.color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(196, 196, 196, 1),
+              offset: Offset(8.0, 12.0),
+              spreadRadius: -8.0,
+              blurRadius: 5.0,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(196, 196, 196, 1),
+              offset: Offset(-8.0, 12.0),
+              spreadRadius: -8.0,
+              blurRadius: 5.0,
+            ),
+          ],
+        ),
+        child: IconButton(
+          iconSize: 22.0,
+          tooltip: "Start a lesson",
+          onPressed: () => {},
+          icon: const Icon(Icons.school_sharp, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
   FloatingActionButton newFlashcardBTN() {
     return FloatingActionButton(
-      tooltip: _showNewFC ? "Close" : "Add new flashcard",
+      key: ValueKey("${widget.deck.uid}_addnew"),
+      tooltip: _showNewFC ? "Close" : "Add a new flashcard",
       backgroundColor: _backgroundColor,
       foregroundColor: Colors.white,
       onPressed: () => setState(() => _showNewFC = !_showNewFC),

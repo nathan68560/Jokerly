@@ -131,17 +131,8 @@ class _DeckPageState extends State<DeckPage> {
       appBar: deckAppBar(),
       body: Stack(
         children: [
-          Container(
-            alignment: Alignment.topLeft,
-            child: ListView(
-              shrinkWrap: true,
-              physics: const ScrollPhysics(),
-              children: [
-                editMenu(context),
-                flashcardList(),
-              ],
-            ),
-          ),
+          flashcardList(),
+          editMenu(context),
           flashcardsCount(context),
           learnBTN(),
           newFlashcard(),
@@ -171,12 +162,17 @@ class _DeckPageState extends State<DeckPage> {
           ),
         ),
         child: Center(
-          child: Text(
-            widget.deck.title,
-            style: const TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 70.0),
+            child: Text(
+              widget.deck.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -197,78 +193,88 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
-  Widget editMenu(BuildContext context) {
-    return Visibility(
-      visible: _edit,
-      child: Container(
-        height: 150,
-        decoration: BoxDecoration(
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 2),
-              blurRadius: 5,
+  Widget flashcardList() {
+    return Container(
+      alignment: Alignment.topLeft,
+      child: ListView(
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        children: [
+          GridView.builder(
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            physics: const ScrollPhysics(),
+            padding: const EdgeInsets.all(20.0),
+            itemCount: widget.deck.flashcards.length,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 400,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
+              childAspectRatio: 1.5,
             ),
-          ],
-          gradient: LinearGradient(
-            stops: const [0.0, 0.5, 1.0],
-            colors: [
-              _gradientColor,
-              _backgroundColor,
-              _gradientColor,
-            ],
+            itemBuilder: (context, index) => FlashcardWidget(
+              key: ValueKey(widget.deck.flashcards[index].uid),
+              flashcard: widget.deck.flashcards[index],
+              saveChanges: _saveDeck,
+              deleteFlashcard: _deleteFlashcard,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  DropdownMenu(
-                    width: 120,
-                    label: const Text(
-                      'Color',
-                      style: TextStyle(color: Colors.white54),
-                    ),
-                    textStyle: const TextStyle(color: Colors.white),
-                    enableSearch: false,
-                    trailingIcon:
-                        const Icon(Icons.arrow_drop_down, color: Colors.white),
-                    selectedTrailingIcon:
-                        const Icon(Icons.arrow_drop_up, color: Colors.white),
-                    initialSelection: _backgroundColor,
-                    inputDecorationTheme: const InputDecorationTheme(
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white38),
+          const SizedBox(height: 72.0),
+        ],
+      ),
+    );
+  }
+
+  Positioned editMenu(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 150,
+      child: Visibility(
+        visible: _edit,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(20.0),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                offset: Offset(0, 2),
+                blurRadius: 5,
+              ),
+            ],
+            gradient: LinearGradient(
+              stops: const [0.0, 0.5, 1.0],
+              colors: [
+                _gradientColor,
+                _backgroundColor,
+                _gradientColor,
+              ],
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    DropdownMenu(
+                      width: 120,
+                      label: const Text(
+                        'Color',
+                        style: TextStyle(color: Colors.white54),
                       ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                    onSelected: (Color? newValue) =>
-                        _updateBgColor(newValue ?? _backgroundColor),
-                    dropdownMenuEntries: ColorLabel.values
-                        .map<DropdownMenuEntry<Color>>((ColorLabel color) {
-                      return DropdownMenuEntry<Color>(
-                          value: color.color,
-                          label: color.label,
-                          leadingIcon: Icon(Icons.circle, color: color.color));
-                    }).toList(),
-                  ),
-                  const SizedBox(width: 40),
-                  Expanded(
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      controller: _descController,
-                      decoration: const InputDecoration(
-                        label: Text(
-                          "Description",
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                        hintText: "A description for the content of this deck",
-                        hintStyle: TextStyle(color: Colors.white70),
+                      textStyle: const TextStyle(color: Colors.white),
+                      enableSearch: false,
+                      trailingIcon: const Icon(Icons.arrow_drop_down,
+                          color: Colors.white),
+                      selectedTrailingIcon:
+                          const Icon(Icons.arrow_drop_up, color: Colors.white),
+                      initialSelection: _backgroundColor,
+                      inputDecorationTheme: const InputDecorationTheme(
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white38),
                         ),
@@ -276,73 +282,87 @@ class _DeckPageState extends State<DeckPage> {
                           borderSide: BorderSide(color: Colors.white),
                         ),
                       ),
+                      onSelected: (Color? newValue) =>
+                          _updateBgColor(newValue ?? _backgroundColor),
+                      dropdownMenuEntries: ColorLabel.values
+                          .map<DropdownMenuEntry<Color>>((ColorLabel color) {
+                        return DropdownMenuEntry<Color>(
+                            value: color.color,
+                            label: color.label,
+                            leadingIcon:
+                                Icon(Icons.circle, color: color.color));
+                      }).toList(),
+                    ),
+                    const SizedBox(width: 40),
+                    Expanded(
+                      child: TextField(
+                        maxLength: 150,
+                        style: const TextStyle(color: Colors.white),
+                        controller: _descController,
+                        decoration: const InputDecoration(
+                          label: Text(
+                            "Description",
+                            style: TextStyle(color: Colors.white54),
+                          ),
+                          hintText:
+                              "A description for the content of this deck",
+                          hintStyle: TextStyle(color: Colors.white70),
+                          counterText: '',
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white38),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 60,
+                    height: 50,
+                    child: IconButton(
+                      iconSize: 25.0,
+                      onPressed: () =>
+                          _removeDeck().then((value) => Navigator.pop(context)),
+                      icon:
+                          const Icon(Icons.delete_forever, color: Colors.white),
+                      tooltip: "Delete deck",
                     ),
                   ),
+                  SizedBox(
+                    width: 60,
+                    height: 50,
+                    child: IconButton(
+                      onPressed: () => _closeEdit(),
+                      icon: const Icon(Icons.save, color: Colors.white),
+                      tooltip: "Save changes",
+                    ),
+                  )
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 60,
-                  height: 50,
-                  child: IconButton(
-                    onPressed: () =>
-                        _removeDeck().then((value) => Navigator.pop(context)),
-                    icon: const Icon(Icons.delete_forever, color: Colors.white),
-                    tooltip: "Delete deck",
-                  ),
-                ),
-                SizedBox(
-                  width: 60,
-                  height: 50,
-                  child: IconButton(
-                    onPressed: () => _closeEdit(),
-                    icon: const Icon(Icons.save, color: Colors.white),
-                    tooltip: "Save changes",
-                  ),
-                )
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  GridView flashcardList() {
-    return GridView.builder(
-      shrinkWrap: true,
-      clipBehavior: Clip.none,
-      physics: const ScrollPhysics(),
-      padding: const EdgeInsets.all(20.0),
-      itemCount: widget.deck.flashcards.length,
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 400,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        childAspectRatio: 1.5,
-      ),
-      itemBuilder: (context, index) => FlashcardWidget(
-        key: ValueKey(widget.deck.flashcards[index].uid),
-        flashcard: widget.deck.flashcards[index],
-        saveChanges: _saveDeck,
-        deleteFlashcard: _deleteFlashcard,
-      ),
-    );
-  }
-
-  Widget newFlashcard() {
+  Positioned newFlashcard() {
     TextEditingController qstController = TextEditingController();
     TextEditingController ansController = TextEditingController();
 
-    return Visibility(
-      visible: _showNewFC,
-      child: Positioned(
-        bottom: 90.0,
-        right: 20.0,
-        width: min(400, (MediaQuery.sizeOf(context).width - 40.0)),
+    return Positioned(
+      bottom: 90.0,
+      right: 20.0,
+      width: min(400, (MediaQuery.sizeOf(context).width - 40.0)),
+      child: Visibility(
+        visible: _showNewFC,
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -363,12 +383,13 @@ class _DeckPageState extends State<DeckPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
+                maxLength: 70,
                 keyboardType: TextInputType.text,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
-                  counterText: '',
                   labelText: 'Question',
                   labelStyle: TextStyle(color: Colors.white70),
+                  counterStyle: TextStyle(fontSize: 9.0, color: Colors.white38),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white38),
                   ),
@@ -378,14 +399,14 @@ class _DeckPageState extends State<DeckPage> {
                 ),
                 controller: qstController,
               ),
-              const SizedBox(height: 20),
               TextField(
+                maxLength: 240,
                 keyboardType: TextInputType.text,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
-                  counterText: '',
                   labelText: 'Answer',
                   labelStyle: TextStyle(color: Colors.white70),
+                  counterStyle: TextStyle(fontSize: 9.0, color: Colors.white38),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white38),
                   ),
@@ -395,7 +416,7 @@ class _DeckPageState extends State<DeckPage> {
                 ),
                 controller: ansController,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 10),
               IconButton(
                 onPressed: () =>
                     _addFlashcard(qstController.text, ansController.text),
@@ -425,33 +446,36 @@ class _DeckPageState extends State<DeckPage> {
       bottom: 16,
       width: 56,
       height: 56,
-      child: Container(
-        decoration: BoxDecoration(
-          color: widget.deck.color,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(196, 196, 196, 1),
-              offset: Offset(8.0, 12.0),
-              spreadRadius: -8.0,
-              blurRadius: 5.0,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(196, 196, 196, 1),
-              offset: Offset(-8.0, 12.0),
-              spreadRadius: -8.0,
-              blurRadius: 5.0,
-            ),
-          ],
-        ),
-        child: IconButton(
-          iconSize: 22.0,
-          tooltip: "Start a lesson",
-          onPressed: () => Navigator.push(
-            context,
-            CupertinoPageRoute(builder: (_) => LessonPage(deck: widget.deck)),
+      child: Visibility(
+        visible: widget.deck.flashcards.isNotEmpty,
+        child: Container(
+          decoration: BoxDecoration(
+            color: widget.deck.color,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(196, 196, 196, 1),
+                offset: Offset(8.0, 12.0),
+                spreadRadius: -8.0,
+                blurRadius: 5.0,
+              ),
+              BoxShadow(
+                color: Color.fromRGBO(196, 196, 196, 1),
+                offset: Offset(-8.0, 12.0),
+                spreadRadius: -8.0,
+                blurRadius: 5.0,
+              ),
+            ],
           ),
-          icon: const Icon(Icons.school_sharp, color: Colors.white),
+          child: IconButton(
+            iconSize: 22.0,
+            tooltip: "Start a lesson",
+            onPressed: () => Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (_) => LessonPage(deck: widget.deck)),
+            ),
+            icon: const Icon(Icons.school_sharp, color: Colors.white),
+          ),
         ),
       ),
     );

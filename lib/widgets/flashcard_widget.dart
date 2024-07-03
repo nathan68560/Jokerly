@@ -4,14 +4,14 @@ import 'package:jokerly/models/flashcard_model.dart';
 
 class FlashcardWidget extends StatefulWidget {
   final Flashcard flashcard;
-  final Function saveChanges;
-  final Function deleteFlashcard;
+  final Function? saveChanges;
+  final Function? deleteFlashcard;
 
   const FlashcardWidget({
     super.key,
     required this.flashcard,
-    required this.saveChanges,
-    required this.deleteFlashcard,
+    this.saveChanges,
+    this.deleteFlashcard,
   });
 
   @override
@@ -26,11 +26,14 @@ class _FlashcardState extends State<FlashcardWidget>
   late Animation _animation;
   AnimationStatus _status = AnimationStatus.dismissed;
   bool _edit = false;
+  bool _editable = true;
 
   // -----------------------
   //        Functions
   // -----------------------
   void _saveChanges() {
+    if (!_editable) return;
+
     RegExp validStr = RegExp(r"\S{1,}");
     if (validStr.allMatches(_qstController.text).isEmpty ||
         validStr.allMatches(_ansController.text).isEmpty) return;
@@ -38,12 +41,14 @@ class _FlashcardState extends State<FlashcardWidget>
     widget.flashcard.question = _qstController.text;
     widget.flashcard.answer = _ansController.text;
     setState(() => _edit = false);
-    widget.saveChanges();
+    widget.saveChanges!();
   }
 
   void _deleteFlashcard() {
+    if (!_editable) return;
+
     setState(() => _edit = false);
-    widget.deleteFlashcard(widget.flashcard);
+    widget.deleteFlashcard!(widget.flashcard);
   }
 
   // -----------------------
@@ -66,6 +71,7 @@ class _FlashcardState extends State<FlashcardWidget>
 
     _qstController.text = widget.flashcard.question;
     _ansController.text = widget.flashcard.answer;
+    _editable = widget.deleteFlashcard != null && widget.saveChanges != null;
   }
 
   @override
@@ -119,18 +125,31 @@ class _FlashcardState extends State<FlashcardWidget>
       ),
       child: Center(
         child: TextField(
-          maxLines: 4,
+          maxLines: _editable ? 6 : null,
           minLines: 1,
-          enabled: _edit,
+          maxLength: 70,
+          readOnly: !_edit,
+          enabled: _editable,
           controller: _qstController,
           textAlign: TextAlign.center,
           keyboardType: TextInputType.text,
           style: const TextStyle(
             color: Color(0xff2a2a2a),
           ),
-          decoration: const InputDecoration(
-            counterText: '',
-            disabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+            counterText: _edit ? null : '',
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                width: 2.0,
+                color: _edit ? Colors.black87 : Colors.transparent,
+              ),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: _edit ? Colors.black54 : Colors.transparent,
+              ),
+            ),
+            disabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.transparent),
             ),
           ),
@@ -159,18 +178,31 @@ class _FlashcardState extends State<FlashcardWidget>
           alignment: FractionalOffset.center,
           transform: Matrix4.identity()..rotateY(pi),
           child: TextField(
-            maxLines: 4,
+            maxLines: _editable ? 6 : null,
             minLines: 1,
-            enabled: _edit,
+            maxLength: 240,
+            readOnly: !_edit,
+            enabled: _editable,
             controller: _ansController,
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             style: const TextStyle(
               color: Colors.white,
             ),
-            decoration: const InputDecoration(
-              counterText: '',
-              disabledBorder: UnderlineInputBorder(
+            decoration: InputDecoration(
+              counterText: _edit ? null : '',
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2.0,
+                  color: _edit ? Colors.white70 : Colors.transparent,
+                ),
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: _edit ? Colors.white54 : Colors.transparent,
+                ),
+              ),
+              disabledBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.transparent),
               ),
             ),
@@ -185,35 +217,38 @@ class _FlashcardState extends State<FlashcardWidget>
       top: 5,
       left: 5,
       right: 5,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        textDirection: TextDirection.rtl,
-        children: [
-          !_edit
-              ? IconButton(
-                  tooltip: "Edit",
-                  icon: Icon(
-                    Icons.edit,
-                    color: _controller.value > 0.5
-                        ? Colors.white
-                        : const Color(0xff2a2a2a),
+      child: Visibility(
+        visible: _editable,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          textDirection: TextDirection.rtl,
+          children: [
+            !_edit
+                ? IconButton(
+                    tooltip: "Edit",
+                    icon: Icon(
+                      Icons.edit,
+                      color: _controller.value > 0.5
+                          ? Colors.white
+                          : const Color(0xff2a2a2a),
+                    ),
+                    onPressed: () => setState(() => _edit = true),
+                  )
+                : IconButton(
+                    tooltip: "Save",
+                    icon: const Icon(Icons.save, color: Colors.green),
+                    onPressed: () => _saveChanges(),
                   ),
-                  onPressed: () => setState(() => _edit = true),
-                )
-              : IconButton(
-                  tooltip: "Save",
-                  icon: const Icon(Icons.save, color: Colors.green),
-                  onPressed: () => _saveChanges(),
-                ),
-          Visibility(
-            visible: _edit,
-            child: IconButton(
-              tooltip: "Delete",
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _deleteFlashcard(),
+            Visibility(
+              visible: _edit,
+              child: IconButton(
+                tooltip: "Delete",
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _deleteFlashcard(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

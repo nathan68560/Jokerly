@@ -197,7 +197,9 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 40),
                   Expanded(
                     child: TextField(
+                      maxLength: 20,
                       decoration: const InputDecoration(
+                        counterText: '',
                         labelText: 'Title',
                       ),
                       controller: titleController,
@@ -207,12 +209,14 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
               TextField(
+                maxLength: 150,
                 decoration: const InputDecoration(
+                  counterStyle: TextStyle(fontSize: 9.0),
                   labelText: 'Description',
                 ),
                 controller: descController,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 10),
               IconButton(
                 onPressed: () => _addDeck(
                     titleController.text, descController.text, bgColor),

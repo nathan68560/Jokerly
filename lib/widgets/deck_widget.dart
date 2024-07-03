@@ -53,42 +53,46 @@ class _FlashcardDeckWidgetState extends State<FlashcardDeckWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.deck.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        letterSpacing: 1,
-                        color: Colors.white,
+            Flexible(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.deck.title,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          letterSpacing: 1,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    Text(
-                      widget.deck.description,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
+                      const SizedBox(height: 10.0),
+                      Text(
+                        widget.deck.description,
+                        softWrap: true,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Text(
-                  "${widget.deck.flashcards.length} flashcard${widget.deck.flashcards.length > 1 ? "s" : ""}",
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 10,
+                    ],
                   ),
-                ),
-              ],
+                  Text(
+                    "${widget.deck.flashcards.length} flashcard${widget.deck.flashcards.length > 1 ? "s" : ""}",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -15,6 +15,8 @@ class LessonPage extends StatefulWidget {
 
 class _LessonPageState extends State<LessonPage> {
   late Size _size;
+  late int _progress;
+  late int _lessonLength;
   final Map<int, int> _targetLevels = {0: 12, 1: 6, 2: 2};
   Color _backgroundColor = Colors.grey;
   List<Flashcard> _lessonFlashcards = [];
@@ -29,16 +31,20 @@ class _LessonPageState extends State<LessonPage> {
   // -----------------------
   /// Construct a list of the flashcards that will be seen in this lesson.
   /// Preferrably following the repartition and count defined by _targetLevels.
-  void selectFlashcards(List<Flashcard> deckFlashcards) {
-    int flashcardCount = _targetLevels.values.reduce((a, b) => a + b);
+  void initFlashcards(List<Flashcard> deckFlashcards) {
+    // Sort flashcards from least to most seen and randomize those equally seen
+    deckFlashcards
+      ..shuffle()
+      ..sort((a, b) => a.seenCount.compareTo(b.seenCount));
 
-    if (deckFlashcards.length <= flashcardCount) {
+    if (deckFlashcards.length <= _lessonLength) {
       // If less than flashcardCount cards, select all
       _lessonFlashcards = deckFlashcards;
+      _lessonLength = deckFlashcards.length;
     } else {
       // Else fill from the top
       int currLvl = _targetLevels.keys.last;
-      while (_lessonFlashcards.length < flashcardCount) {
+      while (_lessonFlashcards.length < _lessonLength) {
         int currLvlCount =
             _lessonFlashcards.where((f) => f.srsLevel == currLvl).length;
         int remaining = _targetLevels[currLvl]! - currLvlCount;
@@ -55,7 +61,7 @@ class _LessonPageState extends State<LessonPage> {
           currLvl--;
           if (currLvl < 0) {
             // Not enough flashcards, fill with remaining cards
-            int fillAmount = flashcardCount - _lessonFlashcards.length;
+            int fillAmount = _lessonLength - _lessonFlashcards.length;
             _lessonFlashcards.addAll(deckFlashcards.take(fillAmount));
             break;
           }
@@ -71,7 +77,9 @@ class _LessonPageState extends State<LessonPage> {
   void initState() {
     super.initState();
     _backgroundColor = widget.deck.color;
-    selectFlashcards(widget.deck.flashcards);
+    _progress = 0;
+    _lessonLength = _targetLevels.values.reduce((a, b) => a + b);
+    initFlashcards(widget.deck.flashcards);
   }
 
   @override
@@ -88,8 +96,16 @@ class _LessonPageState extends State<LessonPage> {
             top: _size.height / 7,
             left: (_size.width - width) / 2,
             width: width,
-            height: height,
-            child: FlashcardWidget(flashcard: _lessonFlashcards.first),
+            bottom: 40,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                flashcard(width, height),
+                progressIndicator(width),
+                actionBTN(width, context),
+              ],
+            ),
           ),
         ],
       ),
@@ -114,7 +130,7 @@ class _LessonPageState extends State<LessonPage> {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               widget.deck.title,
@@ -124,6 +140,65 @@ class _LessonPageState extends State<LessonPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget flashcard(double width, double height) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: FlashcardWidget(
+        key: ValueKey(_lessonFlashcards[_progress].uid),
+        flashcard: _lessonFlashcards[_progress],
+      ),
+    );
+  }
+
+  Widget progressIndicator(double width) {
+    return Column(
+      children: [
+        LinearProgressIndicator(
+          value: _progress / _lessonLength,
+          minHeight: 30,
+          color: widget.deck.color,
+          borderRadius: BorderRadius.circular(15.0),
+          semanticsLabel: "Completion progress for this lesson",
+        ),
+        const SizedBox(height: 5.0),
+        Text(
+          "$_progress/$_lessonLength",
+          style: const TextStyle(
+            color: Colors.black38,
+            fontSize: 9.0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget actionBTN(double width, BuildContext context) {
+    return InkWell(
+      splashColor: Colors.white24,
+      onTap: () {
+        if (_progress < _lessonLength - 1) {
+          setState(() => _progress++);
+        } else {
+          Navigator.pop(context);
+        }
+      },
+      child: Container(
+        height: 80.0,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: widget.deck.color,
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Text(
+          _progress == _lessonLength - 1 ? "Done" : "Next",
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white),
         ),
       ),
     );

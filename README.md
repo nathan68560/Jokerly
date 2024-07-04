@@ -14,7 +14,7 @@
 - Docker Compose installed (https://docs.docker.com/compose/install/)
 
 ### Running the Application 🏃💨
-1. Clone this repository: ```git clone https://github.com/nathan68560/jokerly.git```.
-2. Navigate to the project directory: ```cd jokerly```.
+1. Clone this repository: ```git clone https://github.com/nathan68560/Jokerly.git```.
+2. Navigate to the project directory: ```cd Jokerly```.
 3. Build and run the Docker container: ```docker-compose up -d```.
 4. Access the application: [localhost:8080](http://localhost:8080).

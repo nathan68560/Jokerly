@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  jokerly:
+    build: .
+    ports:
+      - "8080:8080"

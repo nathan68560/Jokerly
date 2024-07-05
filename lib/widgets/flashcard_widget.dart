@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/flashcard_model.dart';
 
@@ -213,39 +214,105 @@ class _FlashcardState extends State<FlashcardWidget>
   }
 
   Positioned editActions() {
+    double recalRatio = 100 *
+        widget.flashcard.successCount /
+        max(1, widget.flashcard.seenCount);
+
     return Positioned(
       top: 5,
       left: 5,
       right: 5,
+      bottom: 5,
       child: Visibility(
         visible: _editable,
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          textDirection: TextDirection.rtl,
           children: [
-            !_edit
-                ? IconButton(
-                    tooltip: "Edit",
-                    icon: Icon(
-                      Icons.edit,
-                      color: _controller.value > 0.5
-                          ? Colors.white
-                          : const Color(0xff2a2a2a),
-                    ),
-                    onPressed: () => setState(() => _edit = true),
-                  )
-                : IconButton(
-                    tooltip: "Save",
-                    icon: const Icon(Icons.save, color: Colors.green),
-                    onPressed: _saveChanges,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              textDirection: TextDirection.rtl,
+              children: [
+                !_edit
+                    ? IconButton(
+                        tooltip: "Edit",
+                        icon: Icon(
+                          Icons.edit,
+                          color: _controller.value > 0.5
+                              ? Colors.white
+                              : const Color(0xff2a2a2a),
+                        ),
+                        onPressed: () => setState(() => _edit = true),
+                      )
+                    : IconButton(
+                        tooltip: "Save",
+                        icon: const Icon(Icons.save, color: Colors.green),
+                        onPressed: _saveChanges,
+                      ),
+                Visibility(
+                  visible: _edit,
+                  child: IconButton(
+                    tooltip: "Delete",
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: _deleteFlashcard,
                   ),
-            Visibility(
-              visible: _edit,
-              child: IconButton(
-                tooltip: "Delete",
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: _deleteFlashcard,
-              ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 5.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.remove_red_eye_sharp,
+                        size: 16.0,
+                        color: Colors.grey.withOpacity(0.35),
+                        semanticLabel: "Seen count icon",
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        widget.flashcard.seenCount.toString(),
+                        semanticsLabel:
+                            "Seen count: ${widget.flashcard.seenCount}",
+                        style: TextStyle(
+                          fontSize: 10.0,
+                          color: Colors.grey.withOpacity(0.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 6.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lightbulb,
+                        size: 15.0,
+                        color: Colors.grey.withOpacity(0.35),
+                        semanticLabel: "Recall ratio icon",
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        "$recalRatio%",
+                        semanticsLabel: "Successful recall: $recalRatio%",
+                        style: TextStyle(
+                          fontSize: 10.0,
+                          color: Colors.grey.withOpacity(0.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

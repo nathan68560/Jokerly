@@ -237,14 +237,14 @@ class _FlashcardState extends State<FlashcardWidget>
                 : IconButton(
                     tooltip: "Save",
                     icon: const Icon(Icons.save, color: Colors.green),
-                    onPressed: () => _saveChanges(),
+                    onPressed: _saveChanges,
                   ),
             Visibility(
               visible: _edit,
               child: IconButton(
                 tooltip: "Delete",
                 icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteFlashcard(),
+                onPressed: _deleteFlashcard,
               ),
             ),
           ],

@@ -339,7 +339,7 @@ class _DeckPageState extends State<DeckPage> {
                     width: 60,
                     height: 50,
                     child: IconButton(
-                      onPressed: () => _closeEdit(),
+                      onPressed: _closeEdit,
                       icon: const Icon(Icons.save, color: Colors.white),
                       tooltip: "Save changes",
                     ),

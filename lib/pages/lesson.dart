@@ -13,11 +13,19 @@ class LessonPage extends StatefulWidget {
   State<StatefulWidget> createState() => _LessonPageState();
 }
 
-class _LessonPageState extends State<LessonPage> {
+class _LessonPageState extends State<LessonPage> with TickerProviderStateMixin {
   late Size _size;
   late int _progress;
   late int _lessonLength;
+  late Animation _inAnimTrans;
+  late Animation _inAnimRot;
+  late Animation _inAnimSize;
+  late Animation _outAnimTrans;
+  late Animation _outAnimRot;
+  late Animation _outAnimSize;
+  late AnimationController _animController;
   final Map<int, int> _targetLevels = {0: 12, 1: 6, 2: 2};
+  bool _isInAnim = true;
   Color _backgroundColor = Colors.grey;
   List<Flashcard> _lessonFlashcards = [];
 
@@ -32,6 +40,8 @@ class _LessonPageState extends State<LessonPage> {
   /// Construct a list of the flashcards that will be seen in this lesson.
   /// Preferrably following the repartition and count defined by _targetLevels.
   void initFlashcards(List<Flashcard> deckFlashcards) {
+    _progress = 0;
+    _lessonLength = _targetLevels.values.reduce((a, b) => a + b);
     // Sort flashcards from least to most seen and randomize those equally seen
     deckFlashcards
       ..shuffle()
@@ -70,6 +80,71 @@ class _LessonPageState extends State<LessonPage> {
     }
   }
 
+  /// Initialize the in/out animations for the flashcard
+  void initAnimations() {
+    _animController = AnimationController(
+      vsync: this,
+      duration: Durations.medium3,
+    );
+    CurvedAnimation curvedInAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeInSine,
+    );
+    CurvedAnimation curvedOutAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutSine,
+    );
+
+    _inAnimTrans = Tween(
+      begin: 300.0,
+      end: 0.0,
+    ).animate(curvedOutAnim);
+    _inAnimRot = Tween(
+      begin: 0.8,
+      end: 0.0,
+    ).animate(curvedOutAnim);
+    _inAnimSize = Tween(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(curvedOutAnim);
+
+    _outAnimTrans = Tween(
+      begin: 0.0,
+      end: -300.0,
+    ).animate(curvedInAnim);
+    _outAnimRot = Tween(
+      begin: 0.0,
+      end: -0.8,
+    ).animate(curvedInAnim);
+    _outAnimSize = Tween(
+      begin: 1.0,
+      end: 0.5,
+    ).animate(curvedInAnim);
+  }
+
+  /// Animate the changes to the next flashcard
+  void nextFlashcard() {
+    setState(() => _isInAnim = false);
+    _animController
+      ..reset()
+      ..forward().then((_) {
+        if (_progress < _lessonLength - 1) {
+          // While it's not the last flashcard, increment progress to the next
+          setState(() {
+            _progress++;
+            _isInAnim = true;
+          });
+          _animController
+            ..reset()
+            ..forward();
+        } else {
+          // Otherwise quit the lesson
+          _animController.reset();
+          Navigator.pop(context);
+        }
+      });
+  }
+
   // -----------------------
   //        Override
   // -----------------------
@@ -77,9 +152,9 @@ class _LessonPageState extends State<LessonPage> {
   void initState() {
     super.initState();
     _backgroundColor = widget.deck.color;
-    _progress = 0;
-    _lessonLength = _targetLevels.values.reduce((a, b) => a + b);
     initFlashcards(widget.deck.flashcards);
+    initAnimations();
+    _animController.forward();
   }
 
   @override
@@ -146,12 +221,22 @@ class _LessonPageState extends State<LessonPage> {
   }
 
   Widget flashcard(double width, double height) {
-    return SizedBox(
-      width: width,
-      height: height,
-      child: FlashcardWidget(
-        key: ValueKey(_lessonFlashcards[_progress].uid),
-        flashcard: _lessonFlashcards[_progress],
+    return AnimatedBuilder(
+      animation: _animController,
+      builder: (context, child) => Transform(
+        alignment: Alignment.bottomCenter,
+        transform: Matrix4.identity()
+          ..translate(_isInAnim ? _inAnimTrans.value : _outAnimTrans.value)
+          ..rotateZ(_isInAnim ? _inAnimRot.value : _outAnimRot.value)
+          ..scale(_isInAnim ? _inAnimSize.value : _outAnimSize.value),
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: FlashcardWidget(
+            key: ValueKey(_lessonFlashcards[_progress].uid),
+            flashcard: _lessonFlashcards[_progress],
+          ),
+        ),
       ),
     );
   }
@@ -181,18 +266,12 @@ class _LessonPageState extends State<LessonPage> {
   Widget actionBTN(double width, BuildContext context) {
     return InkWell(
       splashColor: Colors.white24,
-      onTap: () {
-        if (_progress < _lessonLength - 1) {
-          setState(() => _progress++);
-        } else {
-          Navigator.pop(context);
-        }
-      },
+      onTap: _isInAnim ? nextFlashcard : () {},
       child: Container(
         height: 80.0,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: widget.deck.color,
+          color: _isInAnim ? widget.deck.color : Colors.grey,
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Text(

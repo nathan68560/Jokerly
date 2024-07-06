@@ -35,9 +35,9 @@ class DeckPage extends StatefulWidget {
 }
 
 class _DeckPageState extends State<DeckPage> {
+  final TextEditingController _descController = TextEditingController();
   bool _edit = false;
   bool _showNewFC = false;
-  final TextEditingController _descController = TextEditingController();
   Color _backgroundColor = Colors.grey;
   Color _gradientColor = Colors.grey.shade400;
 
@@ -128,17 +128,16 @@ class _DeckPageState extends State<DeckPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       appBar: deckAppBar(),
       body: Stack(
         children: [
           flashcardList(),
           editMenu(context),
-          flashcardsCount(context),
-          learnBTN(),
           newFlashcard(),
         ],
       ),
-      floatingActionButton: newFlashcardBTN(),
+      bottomNavigationBar: bottomActionBar(),
     );
   }
 
@@ -193,18 +192,20 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
-  Widget flashcardList() {
-    return Container(
-      alignment: Alignment.topLeft,
+  Positioned flashcardList() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       child: ListView(
-        shrinkWrap: true,
         physics: const ScrollPhysics(),
         children: [
           GridView.builder(
             shrinkWrap: true,
             clipBehavior: Clip.none,
             physics: const ScrollPhysics(),
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0).copyWith(bottom: 5.0),
             itemCount: widget.deck.flashcards.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 400,
@@ -219,7 +220,6 @@ class _DeckPageState extends State<DeckPage> {
               deleteFlashcard: _deleteFlashcard,
             ),
           ),
-          const SizedBox(height: 72.0),
         ],
       ),
     );
@@ -358,7 +358,7 @@ class _DeckPageState extends State<DeckPage> {
     TextEditingController ansController = TextEditingController();
 
     return Positioned(
-      bottom: 90.0,
+      bottom: 98.0,
       right: 20.0,
       width: min(400, (MediaQuery.sizeOf(context).width - 40.0)),
       child: Visibility(
@@ -440,86 +440,102 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
-  Positioned learnBTN() {
-    return Positioned(
-      left: 16,
-      bottom: 16,
-      width: 56,
-      height: 56,
-      child: Visibility(
-        visible: widget.deck.flashcards.isNotEmpty,
-        child: Container(
-          decoration: BoxDecoration(
-            color: widget.deck.color,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Color.fromRGBO(196, 196, 196, 1),
-                offset: Offset(8.0, 12.0),
-                spreadRadius: -8.0,
-                blurRadius: 5.0,
-              ),
-              BoxShadow(
-                color: Color.fromRGBO(196, 196, 196, 1),
-                offset: Offset(-8.0, 12.0),
-                spreadRadius: -8.0,
-                blurRadius: 5.0,
-              ),
-            ],
-          ),
-          child: IconButton(
-            iconSize: 22.0,
+  Container bottomActionBar() {
+    String count =
+        "${widget.deck.flashcards.length} card${widget.deck.flashcards.length > 1 ? 's' : ''}";
+
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).colorScheme.surface.withAlpha(0),
+            Theme.of(context).colorScheme.surface,
+          ],
+          stops: const [0.0, 0.2],
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _BottomActionButton(
+            key: ValueKey("${widget.deck.uid}_learnBTN"),
+            icon: const Icon(Icons.school_sharp, color: Colors.white),
             tooltip: "Start a lesson",
+            color: widget.deck.color,
+            visible: widget.deck.flashcards.isNotEmpty,
             onPressed: () => Navigator.push(
               context,
               CupertinoPageRoute(builder: (_) => LessonPage(deck: widget.deck)),
             ),
-            icon: const Icon(Icons.school_sharp, color: Colors.white),
           ),
-        ),
+          Text(count),
+          _BottomActionButton(
+            key: ValueKey("${widget.deck.uid}_addFlashcardBTN"),
+            icon: Transform(
+              transform: Matrix4.rotationZ((_showNewFC ? 0.25 : 0.0) * pi),
+              origin: const Offset(11, 11),
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+            tooltip: _showNewFC ? "Close" : "Add a new flashcard",
+            color: widget.deck.color,
+            onPressed: () => setState(() => _showNewFC = !_showNewFC),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Positioned flashcardsCount(BuildContext context) {
-    String count =
-        "${widget.deck.flashcards.length} card${widget.deck.flashcards.length > 1 ? 's' : ''}";
+class _BottomActionButton extends StatelessWidget {
+  const _BottomActionButton({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+    this.visible = true,
+    this.tooltip,
+  });
 
-    return Positioned(
-      left: 10,
-      right: 10,
-      bottom: 0,
-      height: 88,
+  final Widget icon;
+  final Color color;
+  final String? tooltip;
+  final bool visible;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Visibility(
+      visible: visible,
       child: Container(
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.surface.withAlpha(0),
-              Theme.of(context).colorScheme.surface,
-            ],
-            stops: const [0.0, 0.2],
-          ),
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(196, 196, 196, 1),
+              offset: Offset(8.0, 12.0),
+              spreadRadius: -8.0,
+              blurRadius: 5.0,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(196, 196, 196, 1),
+              offset: Offset(-8.0, 12.0),
+              spreadRadius: -8.0,
+              blurRadius: 5.0,
+            ),
+          ],
         ),
-        child: Center(
-          child: Text(count),
+        child: IconButton(
+          iconSize: 22.0,
+          tooltip: tooltip,
+          onPressed: onPressed,
+          icon: icon,
         ),
-      ),
-    );
-  }
-
-  FloatingActionButton newFlashcardBTN() {
-    return FloatingActionButton(
-      key: ValueKey("${widget.deck.uid}_addnew"),
-      tooltip: _showNewFC ? "Close" : "Add a new flashcard",
-      backgroundColor: _backgroundColor,
-      foregroundColor: Colors.white,
-      onPressed: () => setState(() => _showNewFC = !_showNewFC),
-      child: Transform(
-        transform: Matrix4.rotationZ((_showNewFC ? 45.0 : 0.0) * pi / 180),
-        origin: const Offset(12, 12),
-        child: const Icon(Icons.add),
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jokerly/models/flashcard_model.dart';
 
@@ -91,11 +90,9 @@ class _FlashcardState extends State<FlashcardWidget>
             highlightColor: Colors.transparent,
             onTap: () {
               setState(() {
-                if (_status == AnimationStatus.dismissed) {
-                  _controller.forward();
-                } else {
-                  _controller.reverse();
-                }
+                _status == AnimationStatus.dismissed
+                    ? _controller.forward()
+                    : _controller.reverse();
               });
             },
             child: _controller.value > 0.5 ? backSide() : frontSide(),
@@ -109,107 +106,27 @@ class _FlashcardState extends State<FlashcardWidget>
   // -----------------------
   //        Sub-parts
   // -----------------------
-  Container frontSide() {
-    return Container(
-      padding: const EdgeInsets.all(15.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-            offset: Offset(1, 3),
-            spreadRadius: 1,
-            blurRadius: 1,
-            color: Color.fromARGB(50, 158, 158, 158),
-          ),
-        ],
-      ),
-      child: Center(
-        child: TextField(
-          maxLines: _editable ? 6 : null,
-          minLines: 1,
-          maxLength: 70,
-          readOnly: !_edit,
-          enabled: _editable,
-          controller: _qstController,
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.text,
-          style: const TextStyle(
-            color: Color(0xff2a2a2a),
-          ),
-          decoration: InputDecoration(
-            counterText: _edit ? null : '',
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                width: 2.0,
-                color: _edit ? Colors.black87 : Colors.transparent,
-              ),
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: _edit ? Colors.black54 : Colors.transparent,
-              ),
-            ),
-            disabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-            ),
-          ),
-        ),
-      ),
+  _FlashcardSide frontSide() {
+    return _FlashcardSide(
+      key: ObjectKey("${widget.flashcard.uid}_front"),
+      rad: 0,
+      color: Colors.white,
+      textColor: const Color(0xff2a2a2a),
+      textController: _qstController,
+      maxTextLength: 70,
+      edit: _edit,
     );
   }
 
-  Container backSide() {
-    return Container(
-      padding: const EdgeInsets.all(15.0),
-      decoration: BoxDecoration(
-        color: const Color(0xff2a2a2a),
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-            offset: Offset(1, 3),
-            spreadRadius: 1,
-            blurRadius: 1,
-            color: Color.fromARGB(50, 158, 158, 158),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Transform(
-          alignment: FractionalOffset.center,
-          transform: Matrix4.identity()..rotateY(pi),
-          child: TextField(
-            maxLines: _editable ? 6 : null,
-            minLines: 1,
-            maxLength: 240,
-            readOnly: !_edit,
-            enabled: _editable,
-            controller: _ansController,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.text,
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-            decoration: InputDecoration(
-              counterText: _edit ? null : '',
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2.0,
-                  color: _edit ? Colors.white70 : Colors.transparent,
-                ),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: _edit ? Colors.white54 : Colors.transparent,
-                ),
-              ),
-              disabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.transparent),
-              ),
-            ),
-          ),
-        ),
-      ),
+  _FlashcardSide backSide() {
+    return _FlashcardSide(
+      key: ObjectKey("${widget.flashcard.uid}_back"),
+      rad: pi,
+      color: const Color(0xff2a2a2a),
+      textColor: Colors.white,
+      textController: _ansController,
+      maxTextLength: 240,
+      edit: _edit,
     );
   }
 
@@ -237,9 +154,7 @@ class _FlashcardState extends State<FlashcardWidget>
                         tooltip: "Edit",
                         icon: Icon(
                           Icons.edit,
-                          color: _controller.value > 0.5
-                              ? Colors.white
-                              : const Color(0xff2a2a2a),
+                          color: Colors.grey.withOpacity(0.35),
                         ),
                         onPressed: () => setState(() => _edit = true),
                       )
@@ -258,63 +173,144 @@ class _FlashcardState extends State<FlashcardWidget>
                 ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 5.0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.remove_red_eye_sharp,
-                        size: 16.0,
-                        color: Colors.grey.withOpacity(0.35),
-                        semanticLabel: "Seen count icon",
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        widget.flashcard.seenCount.toString(),
-                        semanticsLabel:
-                            "Seen count: ${widget.flashcard.seenCount}",
-                        style: TextStyle(
-                          fontSize: 10.0,
+            IgnorePointer(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 5.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.remove_red_eye_sharp,
+                          size: 16.0,
                           color: Colors.grey.withOpacity(0.35),
+                          semanticLabel: "Seen count icon",
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 3),
+                        Text(
+                          widget.flashcard.seenCount.toString(),
+                          semanticsLabel:
+                              "Seen count: ${widget.flashcard.seenCount}",
+                          style: TextStyle(
+                            fontSize: 10.0,
+                            color: Colors.grey.withOpacity(0.35),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 6.0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lightbulb,
-                        size: 15.0,
-                        color: Colors.grey.withOpacity(0.35),
-                        semanticLabel: "Recall ratio icon",
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        "$recalRatio%",
-                        semanticsLabel: "Successful recall: $recalRatio%",
-                        style: TextStyle(
-                          fontSize: 10.0,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 6.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lightbulb,
+                          size: 15.0,
                           color: Colors.grey.withOpacity(0.35),
+                          semanticLabel: "Recall ratio icon",
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 3),
+                        Text(
+                          "$recalRatio%",
+                          semanticsLabel: "Successful recall: $recalRatio%",
+                          style: TextStyle(
+                            fontSize: 10.0,
+                            color: Colors.grey.withOpacity(0.35),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FlashcardSide extends StatelessWidget {
+  const _FlashcardSide({
+    super.key,
+    required this.rad,
+    required this.color,
+    required this.textColor,
+    required this.textController,
+    required this.maxTextLength,
+    required this.edit,
+  });
+
+  final double rad;
+  final Color color;
+  final Color textColor;
+  final TextEditingController textController;
+  final int maxTextLength;
+  final bool edit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 35.0),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(1, 3),
+            spreadRadius: 1,
+            blurRadius: 1,
+            color: Color.fromARGB(50, 158, 158, 158),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Transform(
+          alignment: FractionalOffset.center,
+          transform: Matrix4.identity()..rotateY(rad),
+          child: IgnorePointer(
+            ignoring: !edit,
+            child: TextField(
+              maxLines: null,
+              minLines: 1,
+              maxLength: maxTextLength,
+              readOnly: !edit,
+              controller: textController,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.text,
+              style: TextStyle(color: textColor),
+              decoration: InputDecoration(
+                counterText: edit ? null : '',
+                counterStyle: TextStyle(
+                  fontSize: 9.0,
+                  color: Colors.grey.withOpacity(.5),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: edit ? Colors.grey : Colors.transparent,
+                  ),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: edit
+                        ? Colors.grey.withOpacity(.35)
+                        : Colors.transparent,
+                  ),
+                ),
+                disabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _addDeck(String title, String desc, Color color) async {
-    RegExp validStr = RegExp(r"\S{3,}");
+    RegExp validStr = RegExp(r"\S{2,}");
     if (validStr.allMatches(title).isEmpty ||
         validStr.allMatches(desc).isEmpty) {
       return;

@@ -509,6 +509,7 @@ class _BottomActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Visibility(
       visible: visible,
+      replacement: const SizedBox(width: 56.0, height: 56.0),
       child: Container(
         width: 56,
         height: 56,

@@ -94,6 +94,7 @@ class _FlashcardDeckWidgetState extends State<FlashcardDeckWidget> {
                 ],
               ),
             ),
+            const SizedBox(width: 20.0),
             const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
